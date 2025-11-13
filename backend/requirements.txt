@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+pymilvus
+ollama
+python-multipart
+pypdf
+python-dotenv
