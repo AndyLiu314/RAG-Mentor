@@ -1,34 +1,75 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+
+  const handleSubmit = () => {
+    if (!input.trim()) return
+        
+    setMessages([...messages, { role: 'user', content: input }])
+
+    // Simulate AI response (replace with actual API call later)
+    setTimeout(() => {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'This is a placeholder' 
+      }])
+    }, 500)
+
+    setInput('')
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key == 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className='chat-container'>
+      {/* Header area*/ }
+      <div className='chat-header'>
+        RAG Mentor
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+
+      {/* Chat area*/ }
+      <div className='message-area'>
+        {messages.length === 0 ? (
+          <div className='empty-state'>
+            Start a Conversation!
+          </div>
+        ) : (
+          messages.map((msg, idx) => (
+            <div key={idx} className={`message ${msg.role}`}>
+              <div className="message-label">
+                {msg.role === 'user' ? 'You' : 'Assistant'}
+              </div>
+              <div className="message-content">{msg.content}</div>
+            </div>         
+          ))
+        )}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {/* Input area */}
+      <div className="input-area">
+        <div className="input-wrapper">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Send a message..."
+            className="message-input"
+          />
+          <button onClick={handleSubmit} className="send-button">
+            Send
+          </button>
+        </div>
+      </div>      
+    </div>
   )
 }
 
