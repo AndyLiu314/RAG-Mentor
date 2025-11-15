@@ -5,20 +5,41 @@ function App() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!input.trim()) return
-        
-    setMessages([...messages, { role: 'user', content: input }])
 
-    // Simulate AI response (replace with actual API call later)
-    setTimeout(() => {
+    const userMessage = input
+    setInput('')
+        
+    setMessages([...messages, { role: 'user', content: userMessage }])
+
+    try {
+      const response = await fetch('http://localhost:11434/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gemma3:latest',
+          prompt: userMessage,
+          stream: false
+        })
+      })
+
+      const data = await response.json()
+
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'This is a placeholder' 
+        content: data.response 
       }])
-    }, 500)
 
-    setInput('')
+    } catch (error) {
+      console.error('Error:', error)
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Error: Could not connect to Ollama. Make sure it is running.' 
+      }])      
+    }
   }
 
   const handleKeyPress = (e) => {
