@@ -1,8 +1,53 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from routes import chat, documents
+import subprocess
+import time
+import requests
 
-app = FastAPI(title="RAG Mentor")
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+
+ollama_process = None
+
+def ensure_ollama_running():
+    global ollama_process
+
+    try:
+        requests.get("http://localhost:11434")
+        print("✓ Ollama is already running")
+        return True
+    
+    except requests.exceptions.ConnectionError:
+        print("Starting Ollama...")
+        try:
+            ollama_process = subprocess.Popen(['ollama', 'serve'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)           
+            for _ in range(10):
+                time.sleep(1)
+                try:
+                    requests.get("http://localhost:11434")
+                    print("✓ Ollama started successfully")
+                    return True
+                
+                except requests.exceptions.ConnectionError:
+                    continue
+
+            print("✗ Failed to start Ollama")
+            return False
+        
+        except FileNotFoundError:
+            print("✗ Ollama not found. Please install Ollama first.")
+            return False
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_ollama_running()
+    yield
+    if ollama_process:
+        print("Stopping Ollama...")
+        ollama_process.terminate()
+        ollama_process.wait(timeout=5)
+        print("✓ Ollama stopped")
+
+app = FastAPI(title="RAG Mentor", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,9 +56,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
-# app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
 
 @app.get("/")
 def root():
