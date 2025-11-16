@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
 
 function App() {
@@ -14,16 +14,10 @@ function App() {
     setMessages([...messages, { role: 'user', content: userMessage }])
 
     try {
-      const response = await fetch('http://localhost:11434/api/generate', {
+      const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gemma3:latest',
-          prompt: userMessage,
-          stream: false
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
       })
 
       const data = await response.json()
@@ -37,7 +31,7 @@ function App() {
       console.error('Error:', error)
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Error: Could not connect to Ollama. Make sure it is running.' 
+        content: 'Error: Could not connect to backend.' 
       }])      
     }
   }
