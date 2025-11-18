@@ -4,6 +4,8 @@ import './App.css'
 function App() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   const handleSubmit = async () => {
     if (!input.trim()) return
@@ -43,15 +45,53 @@ function App() {
     }
   }
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // just a placeholder for now
+    try {
+      const response = await fetch('http://localhost:8000/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await response.json()
+      
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `✓ ${data.message} (${data.chunks_added} chunks added)`
+      }])
+    } catch (error) {
+      console.error('Upload error:', error)
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '✗ Upload failed'
+      }])
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handlePlusClick = () => {
+    fileInputRef.current?.click()
+  }
+
   return (
     <div className='chat-container'>
-      {/* Header area*/ }
+      {/* Header area */}
       <div className='chat-header'>
         RAG Mentor
       </div>
 
-      {/* Chat area*/ }
-      <div className='message-area'>
+      {/* Chat area */}
+      <div className='messages-area'>
         {messages.length === 0 ? (
           <div className='empty-state'>
             Start a Conversation!
@@ -71,6 +111,21 @@ function App() {
       {/* Input area */}
       <div className="input-area">
         <div className="input-wrapper">
+          <button 
+            onClick={handlePlusClick} 
+            className="upload-button"
+            disabled={uploading}
+            title="Upload PDF"
+          >
+            {uploading ? '⋯' : '+'}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+          />
           <input
             type="text"
             value={input}
