@@ -7,3 +7,4 @@ ollama
 python-multipart
 pypdf
 python-dotenv
+chromadb
