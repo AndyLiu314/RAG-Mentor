@@ -5,7 +5,7 @@ import requests
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from routes import chat
+from routes import chat, upload
 
 ollama_process = None
 
@@ -59,6 +59,7 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
 
 @app.get("/")
 def root():
