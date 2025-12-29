@@ -2,9 +2,8 @@ fastapi
 uvicorn
 langchain
 langchain-community
-pymilvus
 ollama
+PyPDF2
 python-multipart
-pypdf
-python-dotenv
+pydantic
 chromadb
