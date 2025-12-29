@@ -35,8 +35,3 @@ class ChromaDBClient:
         
     def list_collections(self):
         return self.client.list_collections()
-
-
-# Example usage
-if __name__ == "__main__":
-    db = ChromaDBClient()
