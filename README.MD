@@ -7,7 +7,7 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows you to upload PDF doc
 
 - **PDF Upload & Processing** - Upload PDFs and automatically extract and chunk text
 - **Semantic Search** - Uses ChromaDB vector database for intelligent document retrieval
-- **Conversational Memory** - Maintains chat history across sessions
+- **Conversational Memory** - Maintains session-based chat memory
 - **Smart Text Chunking** - Uses LangChain's RecursiveCharacterTextSplitter for better context preservation
 - **Local LLM** - Powered by Ollama (Gemma3 model)
 
