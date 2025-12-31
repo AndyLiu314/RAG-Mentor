@@ -32,4 +32,3 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows you to upload PDF doc
 4. **Query Processing**: User questions are embedded and matched against stored chunks
 5. **Context Retrieval**: Top 3 most relevant chunks are retrieved
 6. **Response Generation**: Context + conversation history is sent to Ollama's Gemma3 model
-7. **Caching**: Responses are cached to speed up repeated queries
