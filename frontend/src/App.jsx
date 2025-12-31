@@ -5,6 +5,7 @@ function App() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [sessionId] = useState(() => `session_${Date.now()}`) // Generate unique session ID
   const fileInputRef = useRef(null)
 
   const handleSubmit = async () => {
@@ -19,7 +20,10 @@ function App() {
       const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ 
+          message: userMessage,
+          session_id: sessionId
+        }),
       })
 
       const data = await response.json()
@@ -53,7 +57,6 @@ function App() {
     const formData = new FormData()
     formData.append('file', file)
 
-    // just a placeholder for now
     try {
       const response = await fetch('http://localhost:8000/api/upload', {
         method: 'POST',
@@ -83,11 +86,40 @@ function App() {
     fileInputRef.current?.click()
   }
 
+  const handleNewChat = async () => {
+    setMessages([])
+    
+    try {
+      await fetch(`http://localhost:8000/api/chat/history/${sessionId}`, {
+        method: 'DELETE'
+      })
+    } catch (error) {
+      console.error('Error clearing history:', error)
+    }
+    
+    window.location.reload()
+  }
+
   return (
     <div className='chat-container'>
       {/* Header area */}
       <div className='chat-header'>
         RAG Mentor
+        <button 
+          onClick={handleNewChat}
+          style={{
+            marginLeft: 'auto',
+            padding: '8px 16px',
+            background: '#444',
+            border: 'none',
+            borderRadius: '6px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          New Chat
+        </button>
       </div>
 
       {/* Chat area */}
