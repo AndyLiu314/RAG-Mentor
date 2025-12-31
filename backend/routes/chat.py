@@ -36,6 +36,7 @@ def add_to_history(session_id: str, role: str, content: str):
         "content": content
     })
     
+    # Keep only last 10 messages in memory
     if len(conversation_memory[session_id]) > 10:
         conversation_memory[session_id] = conversation_memory[session_id][-10:]
 

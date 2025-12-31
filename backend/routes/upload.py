@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import PyPDF2
 import io
 from routes.chromadb_client import ChromaDBClient
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 router = APIRouter()
 
@@ -10,6 +11,12 @@ class UploadResponse(BaseModel):
     message: str
     chunks_added: int
     filename: str
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50,
+    separators=["\n\n", "\n", " ", ""]
+)
 
 def extract_text_from_pdf(pdf_file):
     try:
@@ -20,17 +27,6 @@ def extract_text_from_pdf(pdf_file):
         return text
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error reading PDF: {str(e)}")
-
-def chunk_text(text, chunk_size=500, overlap=50):
-    words = text.split()
-    chunks = []
-    
-    for i in range(0, len(words), chunk_size - overlap):
-        chunk = " ".join(words[i:i + chunk_size])
-        if chunk.strip():
-            chunks.append(chunk)
-    
-    return chunks
 
 @router.post("/", response_model=UploadResponse)
 async def upload_pdf(file: UploadFile = File(...)):
@@ -45,7 +41,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not text.strip():
         raise HTTPException(status_code=400, detail="No text found in PDF")
     
-    chunks = chunk_text(text)
+    chunks = text_splitter.split_text(text)
     
     db = ChromaDBClient()
     
